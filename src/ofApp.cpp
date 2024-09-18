@@ -148,35 +148,11 @@ void ofApp::setup(){
 	{
 		ball->position = ofVec2f(50.f, 50.f)
 		+ ofVec2f(abs(ofRandomf()) * ofApp::WINDOW_WIDTH, abs(ofRandomf()) * ofApp::WINDOW_HEIGHT);
-		//ball->velocity += ofVec2f(ofRandomf() * 8.f, ofRandomf() * 8.f);
 	}
 
 	std::cout << "length: " << scene->objects.size() << std::endl;
 	ofDisableDepthTest();
-	// gui.setup();
-	// gui.add(houseWidth.setup("width", 6, 1, 100));
-	// gui.add(houseHeight.setup("height", 9, 1, 100));
-	// gui.add(houseScale.setup("scale", 1.0, 0.5, 5.0));
 }
-
-//ofVec2f clampVelocity(ofVec2f velocity)
-//{
-//	float tx = terminalVelocity.x, ty = terminalVelocity.y;
-//	float vx = velocity.x, vy = velocity.y;
-//	return ofVec2f(
-//		min(max(-tx, vx), tx),
-//		min(max(-ty, vy), ty)
-//	);
-//}
-
-//ofVec2f getNormalOfLine(ofVec2f start, ofVec2f end)
-//{
-//	float dx = end.x - start.x;
-//	float dy = end.y - start.y;
-//	ofVec2f normal = -ofVec2f(-dy, dx);
-//	normal.normalize();
-//	return normal;
-//}
 
 float cursorX{ 0.0f }, cursorY{ 0.0f };
 
@@ -200,6 +176,7 @@ void ofApp::update() {
 			}
 		}
 
+		// Boundary collision check
 		if (ball->position.x < boundaries.getLeft() + ball->width)
 		{
 			ball->position.x = boundaries.getLeft() + ball->width;
@@ -222,14 +199,13 @@ void ofApp::update() {
 		}
 
 	}
+
+	// Move all the balls
 	for (Ball* ball : scene->getBalls())
 	{
 		ball->position += ball->velocity;
-		//ball->velocity *= .99f;
 	}
-	ofVec2f cursor = { cursorX, cursorY };
-	// balls[0]->velocity = ofVec2f(0.0f, 0.0f);
-	// balls[0]->position = cursor;
+
 }
 
 // Convert a grid coordinate to screen coords
@@ -246,31 +222,15 @@ void ln(int fromX, int fromY, int toX, int toY)
 	ofDrawLine(from, to);
 }
 
-// Draw a rectangle using the lines above
 void rec(int x, int y, int w, int h)
 {
-	//ofDrawRectangle(gridPos(x, y), w, h);
 	ln(x, y, x + w, y);
 	ln(x, y, x, y + h);
 	ln(x + w, y, x + w, y + h);
 	ln(x, y + h, x + w, y + h);
 }
 
-// Draw a triangle using the lines above
-//void tri(int x1, int y1, int x2, int y2, int x3, int y3)
-//{
-//	//ofDrawTriangle(gridPos(x1, y1), gridPos(x2, y2), gridPos(x3, y3));
-//	ln(x1, y1, x2, y2);
-//	ln(x2, y2, x3, y3);
-//	ln(x3, y3, x1, y1);
-//}
-
-//--------------------------------------------------------------
 void ofApp::draw(){
-	/*for (Wall* wall : walls)
-	{
-		ln(wall->start.x, wall->start.y, wall->end.x, wall->end.y);
-	}*/
 	rec(boundaries.x, boundaries.y, boundaries.width, boundaries.height);
 	bool firstBall = true;
 	for (SceneObject* object : scene->objects)
@@ -300,7 +260,7 @@ void ofApp::draw(){
 	}
 }
 
-//--------------------------------------------------------------
+
 void ofApp::keyPressed(int key){
 	if (key == GLFW_KEY_SPACE)
 	{
@@ -312,23 +272,6 @@ void ofApp::keyPressed(int key){
 	}
 }
 
-//--------------------------------------------------------------
-//void ofApp::keyReleased(int key){
-//
-//}
-
-//--------------------------------------------------------------
-//void ofApp::mouseMoved(int x, int y ){
-//	cursorX = x;
-//	cursorY = y;
-//}
-
-//--------------------------------------------------------------
-//void ofApp::mouseDragged(int x, int y, int button){
-//
-//}
-
-//--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
 	if (Ball* target = scene->firstBall())
 	{
@@ -336,159 +279,3 @@ void ofApp::mousePressed(int x, int y, int button){
 			target->velocity = (target->position - ofVec2f(x, y)).normalize() * 5.f;
 	}
 }
-
-//--------------------------------------------------------------
-//void ofApp::mouseReleased(int x, int y, int button){
-//
-//}
-
-//--------------------------------------------------------------
-//void ofApp::mouseEntered(int x, int y){
-//
-//}
-
-//--------------------------------------------------------------
-//void ofApp::mouseExited(int x, int y){
-//
-//}
-
-//--------------------------------------------------------------
-//void ofApp::windowResized(int w, int h){
-//
-//}
-
-//--------------------------------------------------------------
-//void ofApp::gotMessage(ofMessage msg){
-//
-//}
-
-//--------------------------------------------------------------
-//void ofApp::dragEvent(ofDragInfo dragInfo){ 
-//
-//}
-
-//float dist(float x1, float y1, float x2, float y2)
-//{
-//	float distX = x1 - x2;
-//	float distY = y1 - y2;
-//	float len = sqrt((distX * distX) + (distY * distY));
-//	return len;
-//}
-
-/*
- * Unused collision / overlap checks below
- */
-
-// LINE/POINT
-//bool ofApp::linePoint(float x1, float y1, float x2, float y2, float px, float py) {
-//
-//	// get distance from the point to the two ends of the line
-//	float d1 = dist(px, py, x1, y1);
-//	float d2 = dist(px, py, x2, y2);
-//
-//	// get the length of the line
-//	float lineLen = dist(x1, y1, x2, y2);
-//
-//	// since floats are so minutely accurate, add
-//	// a little buffer zone that will give collision
-//	float buffer = 0.1;    // higher # = less accurate
-//
-//	// if the two distances are equal to the line's
-//	// length, the point is on the line!
-//	// note we use the buffer here to give a range,
-//	// rather than one #
-//	if (d1 + d2 >= lineLen - buffer && d1 + d2 <= lineLen + buffer) {
-//		return true;
-//	}
-//	return false;
-//}
-
-// POINT/CIRCLE
-//bool ofApp::pointCircle(float px, float py, float cx, float cy, float r) {
-//
-//	// get distance between the point and circle's center
-//	// using the Pythagorean Theorem
-//	float distX = px - cx;
-//	float distY = py - cy;
-//	float distance = sqrt((distX * distX) + (distY * distY));
-//
-//	// if the distance is less than the circle's
-//	// radius the point is inside!
-//	if (distance <= r) {
-//		return true;
-//	}
-//	return false;
-//}
-
-// CIRCLE/CIRCLE
-//bool ofApp::circleCircle(float c1x, float c1y, float c1r, float c2x, float c2y, float c2r) {
-//
-//	// get distance between the circle's centers
-//	// use the Pythagorean Theorem to compute the distance
-//	float distX = c1x - c2x;
-//	float distY = c1y - c2y;
-//	float distance = sqrt((distX * distX) + (distY * distY));
-//
-//	// if the distance is less than the sum of the circle's
-//	// radii, the circles are touching!
-//	if (distance <= c1r + c2r) {
-//		return true;
-//	}
-//	return false;
-//}
-
-// LINE/CIRCLE
-//bool ofApp::lineCircle(float x1, float y1, float x2, float y2, float cx, float cy, float r) {
-//
-//	// is either end INSIDE the circle?
-//	// if so, return true immediately
-//	bool inside1 = pointCircle(x1, y1, cx, cy, r);
-//	bool inside2 = pointCircle(x2, y2, cx, cy, r);
-//	if (inside1 || inside2) return true;
-//
-//	// get length of the line
-//	float distX = x1 - x2;
-//	float distY = y1 - y2;
-//	float len = sqrt((distX * distX) + (distY * distY));
-//
-//	// get dot product of the line and circle
-//	float dot = (((cx - x1) * (x2 - x1)) + ((cy - y1) * (y2 - y1))) / pow(len, 2);
-//
-//	// find the closest point on the line
-//	float closestX = x1 + (dot * (x2 - x1));
-//	float closestY = y1 + (dot * (y2 - y1));
-//
-//	// is this point actually on the line segment?
-//	// if so keep going, but if not, return false
-//	bool onSegment = linePoint(x1, y1, x2, y2, closestX, closestY);
-//	if (!onSegment) return false;
-//
-//	// get distance to closest point
-//	distX = closestX - cx;
-//	distY = closestY - cy;
-//	float distance = sqrt((distX * distX) + (distY * distY));
-//
-//	if (distance <= r) {
-//		return true;
-//	}
-//	return false;
-//}
-
-// LINE/LINE
-//bool ofApp::lineLine(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4) {
-//
-//	// calculate the distance to intersection point
-//	float uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
-//	float uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
-//
-//	// if uA and uB are between 0-1, lines are colliding
-//	if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1) {
-//
-//		// optionally, draw a circle where the lines meet
-//		float intersectionX = x1 + (uA * (x2 - x1));
-//		float intersectionY = y1 + (uA * (y2 - y1));
-//
-//		return true;
-//	}
-//	return false;
-//}
